@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mable and the Mountain</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --gold: #f1c40f;
+            --bg-color: #ecf0f1;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh; /* Fits within viewport height */
+            box-sizing: border-box;
+            overflow: hidden; /* Prevents scrolling */
+        }
+
+        h1 {
+            color: var(--primary);
+            margin: 5px 0;
+            font-size: 1.5rem;
+        }
+
+        /* Collapsible Story */
+        details.story {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        summary {
+            font-weight: bold;
+            cursor: pointer;
+            color: #2980b9;
+            outline: none;
+            list-style: none; /* Hide default arrow in some browsers */
+        }
+        
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .story p, .story ul {
+            margin: 8px 0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .controls {
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        input[type="number"] {
+            padding: 4px 8px;
+            font-size: 14px;
+            border: 2px solid #bdc3c7;
+            border-radius: 4px;
+            width: 60px;
+            text-align: center;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-left: 5px;
+        }
+
+        button:hover {
+            background-color: #1a252f;
+        }
+
+        .instructions {
+            font-weight: bold;
+            color: #c0392b;
+            margin: 5px 0;
+            font-size: 0.95rem;
+        }
+
+        /* Compact, wrapping workspace */
+        .mountain-path {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap; /* Allows cards to wrap instead of scrolling right */
+            justify-content: center;
+            align-items: center;
+            background: #d5dbdb;
+            border-radius: 10px;
+            padding: 15px;
+            gap: 10px;
+            width: 100%;
+            max-width: 1000px;
+            box-sizing: border-box;
+            overflow-y: auto; /* Adds inner scroll ONLY if n is huge */
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-top: 4px solid var(--gold);
+            border-radius: 6px;
+            padding: 10px;
+            width: 130px;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .end-card {
+            border-top: 4px solid #27ae60;
+            background-color: #e9f7ef;
+            width: 120px;
+        }
+
+        .card h3 {
+            margin: 0 0 5px 0;
+            font-size: 1rem;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 4px;
+        }
+
+        .card p.rule {
+            font-size: 0.75rem;
+            margin: 0 0 10px 0;
+            color: #555;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .input-group input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 4px;
+        }
+
+        .arrow {
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .feedback-message {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-top: 10px;
+            min-height: 24px;
+        }
+
+        .correct { background-color: #abebc6 !important; border-color: #27ae60 !important; }
+        .incorrect { background-color: #f5b7b1 !important; border-color: #c0392b !important; }
+
+    </style>
+</head>
+<body>
+
+    <h1>🍎 Mable and the Mountain</h1>
+    
+    <!-- Collapsible Story Section -->
+    <details class="story" id="story-panel" open>
+        <summary>📖 The Story & Rules (Click to hide/show)</summary>
+        <p>Mable stole a basket of enchanted golden apples to help her escape the mountain guards. On her way down:</p>
+        <ul>
+            <li>1st guard got half her apples, plus 1 for good luck.</li>
+            <li>2nd guard got half her remaining apples, plus 2 for good luck.</li>
+            <li>Repeats for the <em>n</em>th guard, who gets half her remaining apples, plus <em>n</em>.</li>
+        </ul>
+        <p>At the bottom of the mountain, she had exactly <strong>1 golden apple left</strong>.</p>
+    </details>
+
+    <div class="controls">
+        <label for="n-input"><strong>Guards (n):</strong></label>
+        <input type="number" id="n-input" value="3" min="1" max="10">
+        <button onclick="generateApplet()">Set Guards</button>
+        <button onclick="checkAnswers()" style="background-color: #27ae60;">Check Answers</button>
+    </div>
+
+    <p class="instructions">👉 Start at the END (Right/Bottom) and work backwards to the START! 👈</p>
+
+    <!-- The workspace area -->
+    <div id="workspace" class="mountain-path"></div>
+    <div id="feedback" class="feedback-message"></div>
+
+    <script>
+        let state = {};
+        let numGuards = 3;
+
+        window.onload = () => {
+            generateApplet(true); // Don't collapse story on initial load
+        };
+
+        function generateApplet(isInitialLoad = false) {
+            numGuards = parseInt(document.getElementById('n-input').value);
+            if (numGuards < 1) {
+                alert("Please enter at least 1 guard.");
+                return;
+            }
+
+            // Auto-collapse the story to save space when setting guards
+            if (!isInitialLoad) {
+                document.getElementById('story-panel').open = false;
+            }
+
+            // Calculate the correct answers
+            state = {};
+            let currentApples = 1; 
+            
+            for(let i = numGuards; i >= 1; i--) {
+                let applesBefore = (currentApples + i) * 2;
+                let applesGiven = (applesBefore / 2) + i; 
+                
+                state[i] = {
+                    before: applesBefore,
+                    given: applesGiven
+                };
+                currentApples = applesBefore;
+            }
+
+            const ws = document.getElementById('workspace');
+            ws.innerHTML = '';
+            
+            let htmlContent = '';
+            
+            for(let i = 1; i <= numGuards; i++) {
+                htmlContent += `
+                    <div class="card">
+                        <h3>💂‍♂️ Guard ${i}</h3>
+                        <p class="rule">Takes half + ${i}</p>
+                        <div class="input-group">
+                            <label>Basket Before:</label>
+                            <input type="number" id="before-${i}" placeholder="?">
+                            
+                            <label>Given Away:</label>
+                            <input type="number" id="given-${i}" placeholder="?">
+                        </div>
+                    </div>
+                    <div class="arrow">➡️</div>
+                `;
+            }
+
+            htmlContent += `
+                <div class="card end-card">
+                    <h3>⛰️ End</h3>
+                    <h2 style="color: #27ae60; margin: 10px 0;">🍎 1 Left</h2>
+                </div>
+            `;
+
+            ws.innerHTML = htmlContent;
+            document.getElementById('feedback').innerText = '';
+        }
+
+        function checkAnswers() {
+            let allCorrect = true;
+
+            for(let i = 1; i <= numGuards; i++) {
+                let beforeInputElem = document.getElementById(`before-${i}`);
+                let givenInputElem = document.getElementById(`given-${i}`);
+                
+                let beforeVal = parseInt(beforeInputElem.value);
+                let givenVal = parseInt(givenInputElem.value);
+                
+                if (beforeVal === state[i].before) {
+                    beforeInputElem.className = 'correct';
+                } else {
+                    beforeInputElem.className = 'incorrect';
+                    allCorrect = false;
+                }
+                
+                if (givenVal === state[i].given) {
+                    givenInputElem.className = 'correct';
+                } else {
+                    givenInputElem.className = 'incorrect';
+                    allCorrect = false;
+                }
+            }
+
+            const feedbackElem = document.getElementById('feedback');
+            if(allCorrect) {
+                let totalStart = state[1].before;
+                feedbackElem.style.color = "#27ae60";
+                feedbackElem.innerText = `🎉 Correct! Mable started with exactly ${totalStart} apples!`;
+            } else {
+                feedbackElem.style.color = "#c0392b";
+                feedbackElem.innerText = "❌ Keep trying! Check the red boxes. (Remember: Work backwards!)";
+            }
+        }
+    </script>
+</body>
+</html>
